@@ -1,0 +1,105 @@
+#! /usr/bin/python
+
+import sys
+from time import sleep, time, gmtime, strftime
+import psutil
+import argparse
+
+
+pids  = list()
+procs = dict()
+
+attrs = None
+env   = None
+
+startTime = time()
+
+
+def printProc(proc):
+	cmdline = proc.cmdline()
+	attrsVal = None
+	envVal = None
+
+	if attrs != None:
+		attrsVal = proc.as_dict(attrs)
+
+	if vars != None:
+		envVal = proc.environ()
+
+	print '%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline))
+
+	if attrsVal != None:
+		for name, val in attrsVal.iteritems():
+			print '\t- %-12s "%s"' % (name + ':', val)
+
+	if env != None:
+		for name in env:
+			if name in envVal:
+				print '\t- $%-11s "%s"' % (name + ':', envVal[name])
+
+	if (attrs != None) or (env != None):
+		print ''
+
+
+def updateProc(proc):
+	try:
+		if (proc.pid not in procs) or (proc.cmdline != procs[proc.pid].cmdline):
+			printProc(proc)
+		procs[proc.pid] = proc
+
+		childs = proc.children(recursive=True)
+		for child in childs:
+			updateProc(child)
+
+	except psutil.NoSuchProcess as e:
+		if e.pid in procs:
+			del procs[e.pid]
+
+
+def update():
+	for pid in pids:
+		proc = psutil.Process(pid)
+		updateProc(proc)
+
+	# remove processes that has terminated
+	curPids = psutil.pids()
+	pidsToRemove = list()
+
+	for pid in procs:
+		if pid not in curPids:
+			pidsToRemove.append(pid)
+
+	for pid in pidsToRemove:
+		del procs[pid]
+
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument('PID', type=int, nargs='+',
+			help='processes to peek at')
+
+	parser.add_argument('-n', '--interval', type=float, default=0.2,
+			help='update interval in seconds, default is 0.2')
+
+	parser.add_argument('-a', '--attrs', nargs='+',
+			help='extra attributes to read')
+
+	parser.add_argument('-e', '--env', nargs='+',
+			help=' environment variables to read')
+
+	args = parser.parse_args()
+
+	pids = args.PID
+	interval = args.interval
+	attrs = args.attrs
+	env = args.env
+
+	try:
+		while True:
+			update()
+			sleep(interval)
+
+	except KeyboardInterrupt:
+		pass
+
