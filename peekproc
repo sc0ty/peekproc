@@ -37,20 +37,20 @@ def printProc(proc):
 	except psutil.AccessDenied:
 		pass
 
-	print '%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline))
+	print('%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline)))
 
 	if (attrs != None) and (attrsVal != None):
 		for name in attrs:
 			if name in attrsVal:
-				print '\t- %-12s "%s"' % (name + ':', attrsVal[name])
+				print('\t- %-12s "%s"' % (name + ':', attrsVal[name]))
 
 	if (env != None) and (envVal != None):
 		for name in env:
 			if name in envVal:
-				print '\t- $%-11s "%s"' % (name + ':', envVal[name])
+				print('\t- $%-11s "%s"' % (name + ':', envVal[name]))
 
 	if (attrs != None) or (env != None):
-		print ''
+		print('')
 
 
 def updateProc(proc):
