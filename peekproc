@@ -54,7 +54,7 @@ def printProc(proc):
 
 def updateProc(proc):
 	try:
-		if (proc.pid not in procs) or (proc.cmdline != procs[proc.pid].cmdline):
+		if (proc.pid not in procs) or (proc.cmdline() != procs[proc.pid].cmdline()):
 			printProc(proc)
 		procs[proc.pid] = proc
 
