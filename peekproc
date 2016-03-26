@@ -40,8 +40,9 @@ def printProc(proc):
 	print '%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline))
 
 	if (attrs != None) and (attrsVal != None):
-		for name, val in attrsVal.iteritems():
-			print '\t- %-12s "%s"' % (name + ':', val)
+		for name in attrs:
+			if name in attrsVal:
+				print '\t- %-12s "%s"' % (name + ':', attrsVal[name])
 
 	if (env != None) and (envVal != None):
 		for name in env:
