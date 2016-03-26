@@ -16,23 +16,34 @@ startTime = time()
 
 
 def printProc(proc):
-	cmdline = proc.cmdline()
+	cmdline = None
 	attrsVal = None
 	envVal = None
 
-	if attrs != None:
-		attrsVal = proc.as_dict(attrs)
+	try:
+		cmdline = proc.cmdline()
+	except psutil.AccessDenied:
+		pass
 
-	if vars != None:
-		envVal = proc.environ()
+	try:
+		if attrs != None:
+			attrsVal = proc.as_dict(attrs)
+	except psutil.AccessDenied:
+		pass
+
+	try:
+		if vars != None:
+			envVal = proc.environ()
+	except psutil.AccessDenied:
+		pass
 
 	print '%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline))
 
-	if attrsVal != None:
+	if (attrs != None) and (attrsVal != None):
 		for name, val in attrsVal.iteritems():
 			print '\t- %-12s "%s"' % (name + ':', val)
 
-	if env != None:
+	if (env != None) and (envVal != None):
 		for name in env:
 			if name in envVal:
 				print '\t- $%-11s "%s"' % (name + ':', envVal[name])
@@ -51,15 +62,19 @@ def updateProc(proc):
 		for child in childs:
 			updateProc(child)
 
-	except psutil.NoSuchProcess as e:
-		if e.pid in procs:
-			del procs[e.pid]
+	except (psutil.NoSuchProcess, psutil.AccessDenied) as ex:
+		if ex.pid in procs:
+			del procs[ex.pid]
 
 
 def update():
 	for pid in pids:
-		proc = psutil.Process(pid)
-		updateProc(proc)
+		try:
+			proc = psutil.Process(pid)
+			updateProc(proc)
+		except psutil.NoSuchProcess:
+			if pid in procs:
+				del procs[pid]
 
 	# remove processes that has terminated
 	curPids = psutil.pids()
