@@ -17,64 +17,45 @@ formatStr = '{time:.3f}: {pid:6}  {cmd}'
 startTime = time()
 
 
-def printProc(proc):
-	cmdline = None
-	name = None
-	exe = None
-	ppid = None
-	attrsVal = None
-	envVal = None
-
+def printProc(proc, cmdline):
 	try:
-		cmdline = ' '.join(proc.cmdline())
-	except psutil.AccessDenied:
-		cmdline = ''
-
-	try:
-		name = proc.name()
-	except psutil.AccessDenied:
-		name = ''
-
-	try:
-		exe = proc.exe()
-	except psutil.AccessDenied:
-		exe = ''
-
-	try:
-		ppid = proc.ppid()
-	except psutil.AccessDenied:
-		ppid = ''
-
-	try:
-		if attrs != None:
-			attrsVal = proc.as_dict(attrs)
-	except psutil.AccessDenied:
-		pass
-
-	try:
-		if vars != None:
-			envVal = proc.environ()
-	except psutil.AccessDenied:
-		pass
-
-	timestamp = time() - startTime
-
-	try:
-		print(formatStr.format(time=timestamp, name=name, exe=exe, \
-				pid=proc.pid, ppid=ppid, cmd=cmdline))
+		timestamp = time() - startTime
+		procInfo = proc.as_dict(['name', 'exe', 'ppid', 'cwd', 'username'])
+		print(formatStr.format( \
+				time = timestamp, \
+				pid = proc.pid, \
+				cmd = ' '.join(cmdline), \
+				name = procInfo['name'], \
+				exe = procInfo['exe'], \
+				ppid = procInfo['ppid'], \
+				cwd = procInfo['cwd'], \
+				username = procInfo['username'] ))
 	except KeyError as ex:
-		print('unknown format key: "' + ex.args[0] + '"')
+		print('unknown format key "' + ex.args[0] + '"')
 		sys.exit(1)
+	except psutil.AccessDenied:
+		pass
 
-	if (attrs != None) and (attrsVal != None):
-		for name in attrs:
-			if name in attrsVal:
-				print('\t- {:<12} "{}"'.format(name+':', attrsVal[name]))
+	if attrs != None:
+		try:
+			vals = proc.as_dict(attrs)
+			for name in attrs:
+				if name in vals:
+					print('\t- {:<12} "{}"'.format(name+':', vals[name]))
+		except AttributeError as ex:
+			print(ex.args[0])
+			sys.exit(1)
+		except psutil.AccessDenied:
+			pass
 
-	if (env != None) and (envVal != None):
-		for name in env:
-			if name in envVal:
-				print('\t- {:<12} "{}"'.format('$'+name+':', envVal[name]))
+	if env != None:
+		try:
+			vals = proc.environ()
+			for name in env:
+				if name in vals:
+					print('\t- {:<12} "{}"'.format('$'+name+':', vals[name]))
+		except psutil.AccessDenied:
+			pass
 
 	if (attrs != None) or (env != None):
 		print('')
@@ -82,9 +63,10 @@ def printProc(proc):
 
 def updateProc(proc):
 	try:
-		if (proc.pid not in procs) or (proc.cmdline() != procs[proc.pid].cmdline()):
-			printProc(proc)
-		procs[proc.pid] = proc
+		cmdline = proc.cmdline()
+		if (proc.pid not in procs) or (cmdline != procs[proc.pid]):
+			printProc(proc, cmdline)
+		procs[proc.pid] = cmdline
 
 		childs = proc.children(recursive=True)
 		for child in childs:
@@ -105,11 +87,10 @@ def update():
 				del procs[pid]
 
 	# remove processes that has terminated
-	curPids = psutil.pids()
 	pidsToRemove = list()
 
 	for pid in procs:
-		if pid not in curPids:
+		if not psutil.pid_exists(pid):
 			pidsToRemove.append(pid)
 
 	for pid in pidsToRemove:
@@ -126,13 +107,22 @@ if __name__ == "__main__":
 			help='update interval in seconds, default is 0.2')
 
 	parser.add_argument('-a', '--attrs', nargs='+',
-			help='extra attributes to read')
+			help='extra attributes to read, available fields are: ppid, ' + \
+					'name, exe, cmdline, environ, create_time, status, ' + \
+					'cwd, username, uids, gids, terminal, nice, ionice, ' + \
+					'rlimit, io_counters, num_ctx_switches, num_fds, ' + \
+					'num_handles, num_threads, threads, cpu_times, ' + \
+					'cpu_percent, cpu_affinity, memory_info, ' + \
+					'memory_full_info, memory_percent, memory_maps, ' + \
+					'open_files, connections, is_running')
 
 	parser.add_argument('-e', '--env', nargs='+',
 			help=' environment variables to read')
 
 	parser.add_argument('-f', '--format', type=str, default=formatStr,
-			help='output format string, default is "' + formatStr + '"')
+			help='output format string, available fields are: timestamp, ' + \
+					'pid, cmd, name, exe, ppid, cwd, username; default is "' + \
+					formatStr + '"')
 
 	args = parser.parse_args()
 
@@ -145,8 +135,8 @@ if __name__ == "__main__":
 	try:
 		while True:
 			update()
-			sleep(interval)
-
+			if interval > 0:
+				sleep(interval)
 	except KeyboardInterrupt:
 		pass
 
