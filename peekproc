@@ -33,17 +33,17 @@ def printProc(proc):
 	try:
 		name = proc.name()
 	except psutil.AccessDenied:
-		pass
+		name = ''
 
 	try:
 		exe = proc.exe()
 	except psutil.AccessDenied:
-		pass
+		exe = ''
 
 	try:
 		ppid = proc.ppid()
 	except psutil.AccessDenied:
-		pass
+		ppid = ''
 
 	try:
 		if attrs != None:
