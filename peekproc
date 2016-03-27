@@ -12,16 +12,36 @@ procs = dict()
 attrs = None
 env   = None
 
+formatStr = '{time:.3f}: {pid:6}  {cmd}'
+
 startTime = time()
 
 
 def printProc(proc):
 	cmdline = None
+	name = None
+	exe = None
+	ppid = None
 	attrsVal = None
 	envVal = None
 
 	try:
-		cmdline = proc.cmdline()
+		cmdline = ' '.join(proc.cmdline())
+	except psutil.AccessDenied:
+		cmdline = ''
+
+	try:
+		name = proc.name()
+	except psutil.AccessDenied:
+		pass
+
+	try:
+		exe = proc.exe()
+	except psutil.AccessDenied:
+		pass
+
+	try:
+		ppid = proc.ppid()
 	except psutil.AccessDenied:
 		pass
 
@@ -37,17 +57,24 @@ def printProc(proc):
 	except psutil.AccessDenied:
 		pass
 
-	print('%8.3f: %6i  %s' % (time()-startTime, proc.pid, ' '.join(cmdline)))
+	timestamp = time() - startTime
+
+	try:
+		print(formatStr.format(time=timestamp, name=name, exe=exe, \
+				pid=proc.pid, ppid=ppid, cmd=cmdline))
+	except KeyError as ex:
+		print('unknown format key: "' + ex.args[0] + '"')
+		sys.exit(1)
 
 	if (attrs != None) and (attrsVal != None):
 		for name in attrs:
 			if name in attrsVal:
-				print('\t- %-12s "%s"' % (name + ':', attrsVal[name]))
+				print('\t- {:<12} "{}"'.format(name+':', attrsVal[name]))
 
 	if (env != None) and (envVal != None):
 		for name in env:
 			if name in envVal:
-				print('\t- $%-11s "%s"' % (name + ':', envVal[name]))
+				print('\t- {:<12} "{}"'.format('$'+name+':', envVal[name]))
 
 	if (attrs != None) or (env != None):
 		print('')
@@ -104,12 +131,16 @@ if __name__ == "__main__":
 	parser.add_argument('-e', '--env', nargs='+',
 			help=' environment variables to read')
 
+	parser.add_argument('-f', '--format', type=str, default=formatStr,
+			help='output format string, default is "' + formatStr + '"')
+
 	args = parser.parse_args()
 
 	pids = args.PID
 	interval = args.interval
 	attrs = args.attrs
 	env = args.env
+	formatStr = args.format
 
 	try:
 		while True:
