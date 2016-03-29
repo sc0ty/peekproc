@@ -106,6 +106,9 @@ if __name__ == "__main__":
 	parser.add_argument('-n', '--interval', type=float, default=0.2,
 			help='update interval in seconds, default is 0.2')
 
+	parser.add_argument('-q', '--quick', action='store_true',
+			help='run without delay between scans')
+
 	parser.add_argument('-a', '--attrs', nargs='+',
 			help='extra attributes to read, available fields are: ppid, ' + \
 					'name, exe, cmdline, environ, create_time, status, ' + \
@@ -128,6 +131,9 @@ if __name__ == "__main__":
 
 	pids = args.PID
 	interval = args.interval
+	if args.quick:
+		interval = 0
+
 	attrs = args.attrs
 	env = args.env
 	formatStr = args.format
