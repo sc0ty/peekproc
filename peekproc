@@ -17,6 +17,16 @@ formatStr = '{time:.3f}: {pid:6}  {cmd}'
 startTime = time()
 
 
+def printVals(names, vals, prefix=''):
+	for name in names:
+		if name in vals:
+			val = vals[name]
+			if val != None:
+				if type(val) == str:
+					val = '\'' + val + '\''
+				print('    {:<12} {}'.format(prefix+name+':', val))
+
+
 def printProc(proc, cmdline):
 	try:
 		timestamp = time() - startTime
@@ -36,24 +46,19 @@ def printProc(proc, cmdline):
 	except psutil.AccessDenied:
 		pass
 
-	if attrs != None:
-		try:
-			vals = proc.as_dict(attrs)
-			for name in attrs:
-				if name in vals:
-					print('\t- {:<12} "{}"'.format(name+':', vals[name]))
-		except AttributeError as ex:
-			print(ex.args[0])
-			sys.exit(1)
-		except psutil.AccessDenied:
-			pass
+	try:
+		if attrs != None:
+			printVals(attrs, proc.as_dict(attrs))
+		if env != None:
+			printVals(env, proc.environ(), prefix='$')
+	except AttributeError as ex:
+		print(ex.args[0])
+		sys.exit(1)
+	except psutil.AccessDenied:
+		pass
 
-	if env != None:
 		try:
 			vals = proc.environ()
-			for name in env:
-				if name in vals:
-					print('\t- {:<12} "{}"'.format('$'+name+':', vals[name]))
 		except psutil.AccessDenied:
 			pass
 
