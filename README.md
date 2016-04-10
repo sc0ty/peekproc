@@ -3,7 +3,6 @@ Peek at process details.
 It will print executed commands (with arguments) and other information about given process and its childs.
 
 PeekProc is similar to [snoopy](https://github.com/a2o/snoopy), but no library injection is needed.
-
 ## Features
  - monitor commands executed by given processes and by its childs;
  - monitor command arguments, working directory, process and parent PIDs, owner information and more;
@@ -14,41 +13,42 @@ PeekProc is similar to [snoopy](https://github.com/a2o/snoopy), but no library i
 ## Installation
 It is Python script therefore no compilation is needed. It depends on `psutil` version 2.0 or newer.
 Note that Ubuntu 14.04 provides version 1.5 of this package, but you still could install current version with `pip`:
-	```
-	sudo apt update
-	sudo apt install python-pip
-	sudo pip install psutil
-	```
+```
+sudo apt update
+sudo apt install python-pip
+sudo pip install psutil
+```
 PeekProc is compatible with Python 2.x and 3.x.
 
 ## Usage
-`peekproc PID [PID ...] [-h] [-n INTERVAL] [-q] [-s] [-a ATTR [ATTR ...]] [-e ENV [ENV ...]] [-f FORMAT]`
-Arguments:
-	- `PID` - one or more process ID to peek at;
-	- `-h`, `--help`	- print help message;
-	- `-n INTERVAL`, `--interval INTERVAL`	- update interval in seconds, default is 0.2;
-	- `-q`, `--quick`	- run without delay between scans (could result in high CPU load);
-	- `-s`, `--single`	- single pass, scan process tree once and exit;
-	- `-a ATTR [ATTR ...]`, `--attrs ATTR [ATTR ...]`	- one or more attribute to read; list available attributes with `peekproc -h`, for detailed description see [psutil documentation](http://pythonhosted.org/psutil/#process-class);
-	- `-e ENV [ENV ...]`, `--env ENV [ENV ...]`	- environment variables to read;
-	- `-f FORMAT`, `--format FORMAT`	- output format string composed with Python [format string syntax](https://docs.python.org/2/library/string.html#format-string-syntax); list available field names with `peekproc -h`.
+`peekproc PID [PID ...] [OPTIONS]`
+
+Options are:
+- `PID` - one or more process ID to peek at;
+- `-h`, `--help`	- print help message;
+- `-n INTERVAL`, `--interval INTERVAL`	- update interval in seconds, default is 0.2;
+- `-q`, `--quick`	- run without delay between scans (could result in high CPU load);
+- `-s`, `--single`	- single pass, scan process tree once and exit;
+- `-a ATTR [ATTR ...]`, `--attrs ATTR [ATTR ...]`	- one or more attribute to read; list available attributes with `peekproc -h`, for detailed description see [psutil documentation](http://pythonhosted.org/psutil/#process-class);
+- `-e ENV [ENV ...]`, `--env ENV [ENV ...]`	- environment variables to read;
+- `-f FORMAT`, `--format FORMAT`	- output format string composed with Python [format string syntax](https://docs.python.org/2/library/string.html#format-string-syntax); list available field names with `peekproc -h`.
 
 ## Examples
 - monitor process 4872:
-	```
-	sc0ty@lap:~ $peekproc 4872
-	0.002:   4872  tmux
-	0.030:   4873  zsh
-	0.059:   6830  vim peekproc
-	0.115:   6999  git gui
-	```
+    ```
+    sc0ty@lap:~ $peekproc 4872
+    0.002:   4872  tmux
+    0.030:   4873  zsh
+    0.059:   6830  vim peekproc
+    0.115:   6999  git gui
+    ```
 - extra information about process using custom format:
 	```
-	sc0ty@lap:~ $peekproc 4872 -f "{time:.3f}: pid:{pid}, name:{name}, exe:{exe}, ppid:{ppid}, cwd:{cwd}, user:{username}, '{cmd}'"
-	0.002: pid:4872, name:tmux, exe:/usr/local/bin/tmux, ppid:2835, cwd:/home/sc0ty, user:sc0ty, tmux
-	0.031: pid:4873, name:zsh, exe:/bin/zsh5, ppid:4872, cwd:/home/sc0ty/projects/peekproc, user:sc0ty, zsh
-	0.058: pid:6830, name:vim, exe:/usr/local/bin/vim, ppid:4873, cwd:/home/sc0ty/projects/peekproc, user:sc0ty, 'vim peekproc'
-	0.114: pid:6999, name:git, exe:/usr/bin/git, ppid:6943, cwd:/home/sc0ty/projects/peekproc, user:sc0ty, 'git gui'
+	sc0ty@lap:~ $peekproc 4872 -f "{time:.3f}: pid:{pid}, name:{name}, exe:{exe}  '{cmd}'"
+	0.002: pid:4872, name:tmux, exe:/usr/local/bin/tmux, ppid:2835 'tmux
+	0.031: pid:4873, name:zsh, exe:/bin/zsh5 'zsh'
+	0.058: pid:6830, name:vim, exe:/usr/local/bin/vim 'vim peekproc'
+	0.114: pid:6999, name:git, exe:/usr/bin/git 'git gui'
 	```
 - extra information about process (multi-line format):
 	```
