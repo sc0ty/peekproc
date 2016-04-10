@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import sys
 from time import sleep, time
 import psutil
@@ -15,6 +16,10 @@ env   = None
 formatStr = '{time:.3f}: {pid:6}  {cmd}'
 
 startTime = time()
+
+
+def printError(*msg):
+    print("error: ", *msg, file=sys.stderr)
 
 
 def printVals(names, vals, prefix=''):
@@ -41,7 +46,7 @@ def printProc(proc, cmdline):
 				cwd = procInfo['cwd'], \
 				username = procInfo['username'] ))
 	except KeyError as ex:
-		print('unknown format key "' + ex.args[0] + '"')
+		printError('unknown format key "' + ex.args[0] + '"')
 		sys.exit(1)
 	except psutil.AccessDenied:
 		pass
@@ -52,7 +57,7 @@ def printProc(proc, cmdline):
 		if env != None:
 			printVals(env, proc.environ(), prefix='$')
 	except AttributeError as ex:
-		print(ex.args[0])
+		printError(ex.args[0])
 		sys.exit(1)
 	except psutil.AccessDenied:
 		pass
