@@ -35,13 +35,13 @@ Options are:
 
 ## Examples
 - monitor process 4872:
-    ```
-    sc0ty@lap:~ $peekproc 4872
-    0.002:   4872  tmux
-    0.030:   4873  zsh
-    0.059:   6830  vim peekproc
-    0.115:   6999  git gui
-    ```
+	```
+	sc0ty@lap:~ $peekproc 4872
+	0.002:   4872  tmux
+	0.030:   4873  zsh
+	0.059:   6830  vim peekproc
+	0.115:   6999  git gui
+	```
 - extra information about process using custom format:
 	```
 	sc0ty@lap:~ $peekproc 4872 -f "{time:.3f}: pid:{pid}, name:{name}, exe:{exe}  '{cmd}'"
