@@ -19,7 +19,7 @@ startTime = time()
 
 
 def printError(*msg):
-    print("error: ", *msg, file=sys.stderr)
+	print("error: ", *msg, file=sys.stderr)
 
 
 def printVals(names, vals, prefix=''):
