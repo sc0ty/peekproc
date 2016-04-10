@@ -35,45 +35,45 @@ Options are:
 
 ## Examples
 - monitor process 4872:
-	```
-	sc0ty@lap:~ $peekproc 4872
-	0.002:   4872  tmux
-	0.030:   4873  zsh
-	0.059:   6830  vim peekproc
-	0.115:   6999  git gui
-	```
+```
+sc0ty@lap:~ $peekproc 4872
+0.002:   4872  tmux
+0.030:   4873  zsh
+0.059:   6830  vim peekproc
+0.115:   6999  git gui
+```
 - extra information about process using custom format:
-	```
-	sc0ty@lap:~ $peekproc 4872 -f "{time:.3f}: pid:{pid}, name:{name}, exe:{exe}  '{cmd}'"
-	0.002: pid:4872, name:tmux, exe:/usr/local/bin/tmux, ppid:2835 'tmux
-	0.031: pid:4873, name:zsh, exe:/bin/zsh5 'zsh'
-	0.058: pid:6830, name:vim, exe:/usr/local/bin/vim 'vim peekproc'
-	0.114: pid:6999, name:git, exe:/usr/bin/git 'git gui'
-	```
+```
+sc0ty@lap:~ $peekproc 4872 -f "{time:.3f}: pid:{pid}, name:{name}, exe:{exe}  '{cmd}'"
+0.002: pid:4872, name:tmux, exe:/usr/local/bin/tmux, ppid:2835 'tmux
+0.031: pid:4873, name:zsh, exe:/bin/zsh5 'zsh'
+0.058: pid:6830, name:vim, exe:/usr/local/bin/vim 'vim peekproc'
+0.114: pid:6999, name:git, exe:/usr/bin/git 'git gui'
+```
 - extra information about process (multi-line format):
-	```
-	sc0ty@lap:~ $peekproc 8089 --attrs cwd exe ppid --env SHELL TERM
-	0.002:   8089  zsh
-		cwd:         '/home/sc0ty/projects/peekproc'
-		exe:         '/bin/zsh5'
-		ppid:        4872
-		$SHELL:      '/usr/bin/zsh'
-		$TERM:       'screen-256color'
+```
+sc0ty@lap:~ $peekproc 8089 --attrs cwd exe ppid --env SHELL TERM
+0.002:   8089  zsh
+	cwd:         '/home/sc0ty/projects/peekproc'
+	exe:         '/bin/zsh5'
+	ppid:        4872
+	$SHELL:      '/usr/bin/zsh'
+	$TERM:       'screen-256color'
 
-	38.745:   8147  htop
-		cwd:         '/home/sc0ty/projects/peekproc'
-		exe:         '/usr/bin/htop'
-		ppid:        8089
-		$SHELL:      '/usr/bin/zsh'
-		$TERM:       'screen-256color'
+38.745:   8147  htop
+	cwd:         '/home/sc0ty/projects/peekproc'
+	exe:         '/usr/bin/htop'
+	ppid:        8089
+	$SHELL:      '/usr/bin/zsh'
+	$TERM:       'screen-256color'
 
-	53.074:   8151  /usr/local/bin/mc -P /tmp/mc-sc0ty/mc.pwd.8089
-		cwd:         '/home/sc0ty/projects/peekproc'
-		exe:         '/usr/local/bin/mc'
-		ppid:        8089
-		$SHELL:      '/usr/bin/zsh'
-		$TERM:       'screen-256color'
-	```
+53.074:   8151  /usr/local/bin/mc -P /tmp/mc-sc0ty/mc.pwd.8089
+	cwd:         '/home/sc0ty/projects/peekproc'
+	exe:         '/usr/local/bin/mc'
+	ppid:        8089
+	$SHELL:      '/usr/bin/zsh'
+	$TERM:       'screen-256color'
+```
 
 ## Limitations
 1. This tool is gathering information by periodically polling the data. It could result with not reporting every changes. Especially quickly exiting tasks (like `ls`) will probably be missed. One could tune the scan interval with `-n` parameter, or even disable the delay completely with `-q`, but still this limitation will occur.
