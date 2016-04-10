@@ -136,7 +136,7 @@ if __name__ == "__main__":
 			help=' environment variables to read')
 
 	parser.add_argument('-f', '--format', type=str, default=formatStr,
-			help='output format string, available fields are: timestamp, ' + \
+			help='output format string, available fields are: time, ' + \
 					'pid, cmd, name, exe, ppid, cwd, username; default is "' + \
 					formatStr + '"')
 
