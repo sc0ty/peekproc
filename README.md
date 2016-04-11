@@ -33,6 +33,9 @@ Options are:
 - `-e ENV [ENV ...]`, `--env ENV [ENV ...]`	- environment variables to read;
 - `-f FORMAT`, `--format FORMAT`	- output format string composed with Python [format string syntax](https://docs.python.org/2/library/string.html#format-string-syntax); list available field names with `peekproc -h`.
 
+To exit, press Ctrl + C.
+PeekProc will terminate when all monitored process exits (including childs).
+
 ## Examples
 - monitor process 4872:
 ```
@@ -73,6 +76,10 @@ sc0ty@lap:~ $peekproc 8089 --attrs cwd exe ppid --env SHELL TERM
 	ppid:        8089
 	$SHELL:      '/usr/bin/zsh'
 	$TERM:       'screen-256color'
+```
+- power off machine when given program terminates:
+```
+sc0ty@lap:~ $peekproc 1234 -n10 ; poweroff
 ```
 
 ## Limitations
