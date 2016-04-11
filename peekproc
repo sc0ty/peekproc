@@ -112,15 +112,24 @@ def updateProc(proc):
 
 
 def update():
+	pidsToRemove = list()
+
 	for pid in pids:
 		try:
 			proc = psutil.Process(pid)
 			updateProc(proc)
 		except psutil.NoSuchProcess:
+			pidsToRemove.append(pid)
 			if pid in procs:
 				del procs[pid]
 
-	# remove processes that has terminated
+	for pid in pidsToRemove:
+		try:
+			pids.remove(pid)
+		except ValueError:
+			pass
+
+	# remove child processes that has terminated
 	pidsToRemove = list()
 
 	for pid in procs:
@@ -128,7 +137,11 @@ def update():
 			pidsToRemove.append(pid)
 
 	for pid in pidsToRemove:
-		del procs[pid]
+		try:
+			del procs[pid]
+			pids.remove(pid)
+		except ValueError:
+			pass
 
 
 if __name__ == "__main__":
@@ -180,7 +193,7 @@ if __name__ == "__main__":
 		while True:
 			update()
 
-			if singlePass:
+			if singlePass or not pids:
 				break
 
 			if interval > 0:
