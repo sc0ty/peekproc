@@ -193,7 +193,10 @@ if __name__ == "__main__":
 		while True:
 			update()
 
-			if singlePass or not pids:
+			if singlePass:
+				break
+
+			if not pids and not procs:
 				break
 
 			if interval > 0:
